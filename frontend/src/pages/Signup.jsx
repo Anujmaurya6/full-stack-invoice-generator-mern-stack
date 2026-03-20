@@ -7,9 +7,10 @@ export default function Signup() {
     setLoading(true)
 
     try {
-      const { data } = await API.post("/auth/register", { name, email, password })
+      const response = await API.post("/auth/register", { name, email, password })
+      const data = response.data
 
-      if (res.ok) {
+      if (response.status === 200 || response.status === 201) {
         alert("Signup successful. Please login.")
         navigate("/login")
       } else {

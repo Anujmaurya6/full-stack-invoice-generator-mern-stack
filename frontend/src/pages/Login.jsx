@@ -8,9 +8,10 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const { data } = await API.post("/auth/login", { email, password })
+      const response = await API.post("/auth/login", { email, password })
+      const data = response.data
 
-      if (res.ok) {
+      if (response.status === 200) {
 
         login(data)   // ✅ context login
 
