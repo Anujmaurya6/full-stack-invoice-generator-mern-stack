@@ -1,10 +1,7 @@
 import { Check } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
-import { API } from "../../services/api"
-import axios from "axios"
-import { useNavigate } from "react-router-dom"
-import { useState } from "react"
+import API from "../../services/api"
 
 export default function Pricing() {
 
