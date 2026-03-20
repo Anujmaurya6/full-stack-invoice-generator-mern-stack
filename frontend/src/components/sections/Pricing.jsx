@@ -24,14 +24,9 @@ export default function Pricing() {
 
       setLoadingPlan(planType)
 
-      const { data: order } = await axios.post(
-        "http://localhost:5000/api/payment/create-order",
-        { plan: planType },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      const { data: order } = await API.post(
+        "/payment/create-order",
+        { plan: planType }
       )
 
       const options = {
@@ -47,14 +42,9 @@ export default function Pricing() {
         // 🔥 PAYMENT SUCCESS HANDLER
         handler: async function (response) {
 
-          const res = await axios.post(
-            "http://localhost:5000/api/payment/verify-payment",
-            response,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
+          const res = await API.post(
+            "/payment/verify-payment",
+            response
           )
 
           // 🔥 UPDATE USER PLAN IN LOCAL STORAGE

@@ -311,7 +311,7 @@ export default function InvoicePreview() {
           <div className="flex justify-end pt-6 border-t border-gray-200">
             <div className="text-center">
               <img
-                src={invoice.signature.startsWith('http') ? invoice.signature : `http://localhost:5000/${invoice.signature}`}
+                src={invoice.signature.startsWith('http') ? invoice.signature : `${import.meta.env.VITE_API_URL?.replace('/api', '')}/${invoice.signature}`}
                 alt="Signature"
                 className="h-16 object-contain mb-2"
               />

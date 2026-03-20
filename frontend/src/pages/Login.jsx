@@ -1,30 +1,14 @@
-import { useState, useContext } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { API } from "../services/api"
 import { AuthContext } from "../context/AuthContext"
 
 export default function Login() {
-
-  const navigate = useNavigate()
-  const { login } = useContext(AuthContext)
-
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-
+// ... existing state ...
   const handleLogin = async (e) => {
-
     e.preventDefault()
     setLoading(true)
 
     try {
-
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      })
-
-      const data = await res.json()
+      const { data } = await API.post("/auth/login", { email, password })
 
       if (res.ok) {
 

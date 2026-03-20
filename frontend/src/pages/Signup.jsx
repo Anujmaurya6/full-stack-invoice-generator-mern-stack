@@ -1,25 +1,13 @@
-import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { API } from "../services/api"
 
 export default function Signup() {
-  const navigate = useNavigate()
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-
+// ... existing state ...
   const handleSignup = async (e) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
-      })
-
-      const data = await res.json()
+      const { data } = await API.post("/auth/register", { name, email, password })
 
       if (res.ok) {
         alert("Signup successful. Please login.")
