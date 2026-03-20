@@ -1,7 +1,12 @@
 import axios from "axios";
 
+// 🔥 PRODUCTION URL - hardcoded to avoid build-time env issues on Vercel
+const PRODUCTION_API = "https://full-stack-invoice-generator-mern-stack.onrender.com/api";
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://full-stack-invoice-generator-mern-stack.onrender.com/api",
+  baseURL: import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== "" 
+    ? import.meta.env.VITE_API_URL 
+    : PRODUCTION_API,
 });
 
 // 🔥 TOKEN AUTO ADD

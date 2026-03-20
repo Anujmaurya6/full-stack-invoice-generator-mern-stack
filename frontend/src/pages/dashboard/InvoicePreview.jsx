@@ -151,7 +151,7 @@ export default function InvoicePreview() {
             {/* LOGO */}
             {invoice.logo && (
               <img
-                src={invoice.logo.startsWith('http') ? invoice.logo : `http://localhost:5000/${invoice.logo}`}
+                src={invoice.logo.startsWith('http') ? invoice.logo : `https://full-stack-invoice-generator-mern-stack.onrender.com/${invoice.logo}`}
                 alt="Company Logo"
                 className="h-16 object-contain"
               />
