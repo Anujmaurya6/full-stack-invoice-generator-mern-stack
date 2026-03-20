@@ -17,8 +17,10 @@ export default function CreateAI() {
   });
 
   const [theme, setTheme] = useState("color");
-  const [loading, setLoading] = useState(false);
   const [invoiceData, setInvoiceData] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [payLink, setPayLink] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user?.plan) {
@@ -43,6 +45,8 @@ export default function CreateAI() {
 
       if (res.status === "success") {
         setInvoiceData(res.invoice);
+        setPdfUrl(res.pdf_url);
+        setPayLink(res.payment_link);
         setMsg(res.message);
       } else if (res.status === "need_more_info") {
         setMsg(`💡 Info needed: ${res.missing_fields.join(", ")}`);
@@ -177,6 +181,32 @@ export default function CreateAI() {
               msg.includes("Info needed") ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-400" : "bg-purple-500/10 border-purple-500/20 text-purple-300"
             }`}>
               {msg}
+            </div>
+          )}
+
+          {/* ACTION BUTTONS (LIFECYCLE) */}
+          {(pdfUrl || payLink) && (
+            <div className="flex gap-4 mb-6 animate-in fade-in zoom-in-95 duration-500">
+              {pdfUrl && (
+                <a 
+                  href={pdfUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="flex-1 py-3 px-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center text-sm font-bold transition-all flex items-center justify-center gap-2"
+                >
+                  📥 Download PDF
+                </a>
+              )}
+              {payLink && (
+                <a 
+                  href={payLink}
+                  target="_blank"
+                  rel="noreferrer" 
+                  className="flex-1 py-3 px-4 rounded-xl bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500/40 text-center text-sm font-bold text-blue-300 transition-all flex items-center justify-center gap-2"
+                >
+                  💳 Pay Now
+                </a>
+              )}
             </div>
           )}
 

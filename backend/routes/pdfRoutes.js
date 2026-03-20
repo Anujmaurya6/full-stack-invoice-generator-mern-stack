@@ -10,5 +10,6 @@ const router = express.Router();
  * @access  Protected
  */
 router.post("/generate", auth, createPDF);
+router.get("/download/:id", auth, createPDF); // ⚡ GET Alias for Easy AI Linking
 
 export default router;

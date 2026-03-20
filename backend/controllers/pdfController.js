@@ -9,7 +9,7 @@ export const createPDF = async (req, res) => {
     const user = await User.findById(req.user);
 
     const invoice = await Invoice.findOne({
-      _id: req.body.invoiceId,
+      _id: req.params.id || req.body.invoiceId,
       userId: req.user
     });
 

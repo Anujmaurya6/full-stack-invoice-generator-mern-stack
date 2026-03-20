@@ -47,14 +47,14 @@ export const generateAIInvoice = async (req, res) => {
         clientName: client || "Client",
         items: items.map(i => ({ 
           description: i.name, 
-          quantity: i.qty, 
+          quantity: i.qty || 1, 
           rate: i.price,
-          amount: i.price * i.qty
+          amount: i.price * (i.qty || 1)
         })),
         amount: subtotal,
         gst: gst,
         finalAmount: total,
-        status: "Paid", // Default as per prompt example
+        status: "Paid",
         mode: "AI",
         theme: user.plan === "PRO" ? "color" : "black",
         layout: user.plan === "PRO" ? "modern" : "simple"
@@ -67,12 +67,25 @@ export const generateAIInvoice = async (req, res) => {
         invoiceId: invoice._id
       });
 
+      // 📄 CONSTRUCT PDF URL
+      const host = req.get('host');
+      const protocol = req.protocol;
+      const pdf_url = `${protocol}://${host}/api/pdf/download/${invoice._id}`;
+
+      // 💳 CONSTRUCT PAYMENT LINK (Placeholder for frontend trigger)
+      // In a real prod environment, we'd call Razorpay createOrder here.
+      const payment_link = `${protocol}://${host}/api/payments/checkout/${invoice._id}`;
+
       return res.json({
-        ...aiResponse,
+        status: "success",
+        message: aiResponse.message || "Invoice processed through lifecycle",
         invoiceId: invoice._id,
-        assets: {
-          logo: user.logo,
-          signature: user.signature
+        invoice: aiResponse.invoice,
+        pdf_url,
+        payment_link,
+        user: {
+          id: user._id,
+          name: user.name
         }
       });
     }
