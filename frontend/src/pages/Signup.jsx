@@ -1,0 +1,95 @@
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+
+export default function Signup() {
+  const navigate = useNavigate()
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleSignup = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        alert("Signup successful. Please login.")
+        navigate("/login")
+      } else {
+        alert(data.msg)
+      }
+    } catch {
+      alert("Server error")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-100 px-4">
+
+      <form
+        onSubmit={handleSignup}
+        className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-200"
+      >
+        <h2 className="text-3xl font-bold text-center mb-6 text-blue-900">
+          Create Account
+        </h2>
+
+        {/* Name */}
+        <input
+          placeholder="Full Name"
+          className="w-full p-3 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+
+        {/* Email */}
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-3 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        {/* Password */}
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-3 mb-6 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        {/* Button */}
+        <button
+          disabled={loading}
+          className="w-full py-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg transition"
+        >
+          {loading ? "Creating..." : "Sign Up"}
+        </button>
+
+        {/* Link */}
+        <p className="text-sm text-center mt-5 text-gray-600">
+          Already have an account?{" "}
+          <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
+            Login
+          </Link>
+        </p>
+      </form>
+    </div>
+  )
+}

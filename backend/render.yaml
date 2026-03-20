@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ai-invoice-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://my_invoice:my_invoice123@cluster0.ug6u3dp.mongodb.net/mera_invoice
+      - key: JWT_SECRET
+        value: mera_invoice_jwt_secret_2026
+      - key: GEMINI_API_KEY
+        value: AIzaSyC65wbGCXf9FYtSfB4FNaaqKGkXwwN8gUA
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_SI0lsWNFQzxE6A
+      - key: RAZORPAY_KEY_SECRET
+        value: kweA59EVD0BdZDvpJM4R0ckG
+      - key: NODE_ENV
+        value: production
