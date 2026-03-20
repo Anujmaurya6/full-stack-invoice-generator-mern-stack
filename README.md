@@ -54,5 +54,4 @@ Genesis AI is a premium, full-stack invoice management system powered by Google 
 - **Frontend**: Optimized for Vercel.
 - **Backend**: Optimized for Render (see `render.yaml`).
 
----
-Built with ⚡ by Antigravity AI
+
