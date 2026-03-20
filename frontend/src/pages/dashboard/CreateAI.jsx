@@ -30,33 +30,31 @@ export default function CreateAI() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const [msg, setMsg] = useState("");
+
   const handleGenerate = async () => {
-
     try {
-
       setLoading(true);
+      setMsg("");
 
-      const prompt = `
-Client: ${form.clientName}
-Amount: ${form.amount}
-Status: ${form.status}
-Description: ${form.description}
-`;
+      const prompt = `Client: ${form.clientName}\nAmount: ${form.amount}\nStatus: ${form.status}\nDescription: ${form.description}`;
 
       const res = await generateAIInvoice(prompt);
 
-      setInvoiceData(res.invoice);
+      if (res.status === "success") {
+        setInvoiceData(res.invoice);
+        setMsg(res.message);
+      } else if (res.status === "need_more_info") {
+        setMsg(`💡 Info needed: ${res.missing_fields.join(", ")}`);
+      } else {
+        setMsg(res.message || "AI was unable to process this.");
+      }
 
     } catch (err) {
-
-      alert(err.response?.data?.msg || "AI Failed");
-
+      setMsg(err.response?.data?.message || "AI System Offline");
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
     <div className="min-h-screen bg-slate-900 text-white p-6 md:p-12 font-sans overflow-hidden relative">
@@ -173,14 +171,23 @@ Description: ${form.description}
               </div>
             </div>
 
-            {/* GENERATE BUTTON */}
-            <button
-              onClick={handleGenerate}
-              disabled={loading}
-              className={`w-full mt-8 relative group overflow-hidden py-4 rounded-2xl font-black text-lg transition-all ${
-                loading ? "cursor-wait opacity-80" : "hover:scale-[1.02] active:scale-95"
-              }`}
-            >
+            {/* MSG DISPLAY */}
+          {msg && (
+            <div className={`p-4 rounded-2xl mb-6 text-sm font-medium border animate-in fade-in slide-in-from-top-2 ${
+              msg.includes("Info needed") ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-400" : "bg-purple-500/10 border-purple-500/20 text-purple-300"
+            }`}>
+              {msg}
+            </div>
+          )}
+
+          {/* GENERATE BUTTON */}
+          <button
+            onClick={handleGenerate}
+            disabled={loading}
+            className={`w-full relative group overflow-hidden py-4 rounded-2xl font-black text-lg transition-all ${
+              loading ? "cursor-wait opacity-80" : "hover:scale-[1.02] active:scale-95"
+            }`}
+          >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500"></div>
               <span className="relative z-10 flex items-center justify-center gap-3">

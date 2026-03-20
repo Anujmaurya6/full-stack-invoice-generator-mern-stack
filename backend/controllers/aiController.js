@@ -5,7 +5,6 @@ import { generateInvoiceAI } from "../services/geminiService.js";
 
 export const generateAIInvoice = async (req, res) => {
   try {
-    // ✅ FIXED: Use req.user directly (it's already the ID from middleware)
     const user = await User.findById(req.user);
 
     if (!user) {
@@ -14,112 +13,78 @@ export const generateAIInvoice = async (req, res) => {
 
     // ❌ FREE BLOCK
     if (user.plan === "FREE") {
-      return res.status(403).json({ msg: "Upgrade to use AI" });
-    }
-
-    // 🔒 BASIC LIMIT (5/day)
-    if (user.plan === "BASIC") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const count = await Usage.countDocuments({
-        userId: user._id,
-        action: "AI_GENERATE",
-        createdAt: { $gte: today }
-      });
-
-      if (count >= 5) {
-        return res.status(403).json({ 
-          msg: "Daily limit reached (5/day)",
-          remaining: 0 
-        });
-      }
+      return res.status(403).json({ msg: "Upgrade to use AI Assistant" });
     }
 
     const { prompt } = req.body;
 
     if (!prompt || prompt.trim().length === 0) {
-      return res.status(400).json({ msg: "Prompt is required" });
+      return res.status(400).json({ 
+        status: "error",
+        message: "Prompt is required",
+        missing_fields: ["prompt"]
+      });
     }
 
-    // 🔥 PASS PLAN TO AI
-    let aiData = await generateInvoiceAI(prompt, user.plan);
+    // 🔥 GENERATE VIA SERVICE
+    let aiResponse = await generateInvoiceAI(prompt, user.plan);
 
-    if (!aiData || typeof aiData !== "object") {
-      return res.status(400).json({ msg: "Invalid AI response" });
+    if (!aiResponse || typeof aiResponse !== "object") {
+      throw new Error("Invalid AI response");
     }
 
-    // ✅ DEFAULT SAFE VALUES
-    const amount = aiData.amount || 0;
-
-    let gst = 0;
-    let finalAmount = amount;
-    let items = aiData.items?.length
-      ? aiData.items.map(item => ({
-          ...item,
-          amount: (item.quantity && item.rate) ? (item.quantity * item.rate) : (item.quantity * (item.price || 0))
-        }))
-      : [{ description: "Service", quantity: 1, rate: amount, amount: amount }];
-
-    let theme = "black";
-    let layout = "simple";
-
-    // ⚡ PLAN BASED LOGIC
-    if (user.plan === "PRO") {
-      gst = amount * 0.18;
-      finalAmount = amount + gst;
-
-      theme = "color";
-      layout = "modern";
+    // 🔒 IF NEED MORE INFO
+    if (aiResponse.status === "need_more_info") {
+      return res.json(aiResponse);
     }
 
-    // 🔥 CREATE INVOICE
-    const invoice = await Invoice.create({
-      userId: user._id,
-      clientName: aiData.clientName || "Client",
-      items,
-      amount,
-      gst,
-      finalAmount,
-      status: aiData.status || "Paid",
-      mode: "AI",
-      theme,
-      layout
-    });
+    // ✅ SUCCESS PATH - CREATE IN DB
+    if (aiResponse.status === "success") {
+      const { client, items, subtotal, gst, total } = aiResponse.invoice;
 
-    // 🔥 TRACK USAGE
-    await Usage.create({
-      userId: user._id,
-      action: "AI_GENERATE",
-      invoiceId: invoice._id
-    });
+      const invoice = await Invoice.create({
+        userId: user._id,
+        clientName: client || "Client",
+        items: items.map(i => ({ 
+          description: i.name, 
+          quantity: i.qty, 
+          rate: i.price,
+          amount: i.price * i.qty
+        })),
+        amount: subtotal,
+        gst: gst,
+        finalAmount: total,
+        status: "Paid", // Default as per prompt example
+        mode: "AI",
+        theme: user.plan === "PRO" ? "color" : "black",
+        layout: user.plan === "PRO" ? "modern" : "simple"
+      });
 
-    // Calculate remaining prompts for BASIC
-    let remaining = null;
-    if (user.plan === "BASIC") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayCount = await Usage.countDocuments({
+      // 🔥 TRACK USAGE
+      await Usage.create({
         userId: user._id,
         action: "AI_GENERATE",
-        createdAt: { $gte: today }
+        invoiceId: invoice._id
       });
-      remaining = 5 - todayCount;
+
+      return res.json({
+        ...aiResponse,
+        invoiceId: invoice._id,
+        assets: {
+          logo: user.logo,
+          signature: user.signature
+        }
+      });
     }
 
-    // 🔥 RETURN WITH USER ASSETS
-    res.json({
-      message: "AI Invoice Generated",
-      invoice,
-      assets: {
-        logo: user.logo,
-        signature: user.signature
-      },
-      remaining: remaining
-    });
+    res.status(400).json(aiResponse);
 
   } catch (err) {
-    console.log("AI ERROR:", err.message);
-    res.status(500).json({ msg: "AI failed" });
+    console.log("AI ASSISTANT ERROR:", err.message);
+    res.status(500).json({ 
+      status: "error",
+      message: "AI Assistant failed to process request",
+      error: err.message 
+    });
   }
 };

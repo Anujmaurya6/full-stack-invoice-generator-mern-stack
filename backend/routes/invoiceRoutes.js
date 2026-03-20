@@ -15,6 +15,7 @@ const router = express.Router();
  * @access  Protected
  */
 router.post("/", auth, createInvoice);
+router.post("/create", auth, createInvoice); // ⚡ AI Assistant Alias
 
 /**
  * @route   GET /api/invoices
