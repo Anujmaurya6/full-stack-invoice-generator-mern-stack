@@ -1,8 +1,14 @@
+import { useState, useContext } from "react"
+import { useNavigate, Link } from "react-router-dom"
 import { API } from "../services/api"
 import { AuthContext } from "../context/AuthContext"
 
 export default function Login() {
-// ... existing state ...
+  const navigate = useNavigate()
+  const { login } = useContext(AuthContext)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)

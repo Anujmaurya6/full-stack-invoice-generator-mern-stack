@@ -1,7 +1,13 @@
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
 import { API } from "../services/api"
 
 export default function Signup() {
-// ... existing state ...
+  const navigate = useNavigate()
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
   const handleSignup = async (e) => {
     e.preventDefault()
     setLoading(true)
